@@ -44,9 +44,9 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS contacts (id integer primary key, n
 # con.commit()
 # con.close()
 
-# query = "INSERT INTO contacts VALUES (null,'pawan', '1234567890', 'null')"
-# cursor.execute(query)
-# con.commit()
+query = "INSERT INTO contacts VALUES (null,'mum', '7869837256', 'null')"
+cursor.execute(query)
+con.commit()
 
 # query = 'kunal'
 # query = query.strip().lower()
@@ -55,6 +55,6 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS contacts (id integer primary key, n
 # results = cursor.fetchall()
 # print(results[0][0])
 
-query = "DELETE FROM contacts WHERE name = 'Daddy'"
-cursor.execute(query)
-con.commit()
+# query = "DELETE FROM contacts WHERE name = 'Daddy'"
+# cursor.execute(query)
+# con.commit()

@@ -15,6 +15,7 @@ from engine.config import ASSISTANT_NAME
 # Playing assiatnt sound function
 import pywhatkit as kit
 import pvporcupine
+from googletrans import Translator
 
 from engine.helper import extract_yt_term, remove_words
 from hugchat import hugchat
@@ -134,42 +135,74 @@ def findContact(query):
         return 0, 0
     
 def whatsApp(mobile_no, message, flag, name):
-    
+    from urllib.parse import quote
+    import pyautogui
+    import time
 
     if flag == 'message':
-        target_tab = 12
-        jarvis_message = "message send successfully to "+name
+        encoded_message = quote(message)
+        whatsapp_url = f"whatsapp://send?phone={mobile_no}&text={encoded_message}"
+        subprocess.run(f'start "" "{whatsapp_url}"', shell=True)
+        time.sleep(5)  # wait for WhatsApp to load
+        pyautogui.press('enter')  # Send message
+        speak("Message sent successfully to " + name)
 
-    elif flag == 'call':
-        target_tab = 7
-        jarvis_message = "calling to "+name
+    elif flag == 'call' or flag == 'video call':
+        whatsapp_url = f"whatsapp://send?phone={mobile_no}"
+        subprocess.run(f'start "" "{whatsapp_url}"', shell=True)
+        time.sleep(6)  # wait for chat to open
 
-    else:
-        target_tab = 6
-        jarvis_message = "staring video call with "+name
-
-
-    # Encode the message for URL
-    encoded_message = quote(message)
-    print(encoded_message)
-    # Construct the URL
-    whatsapp_url = f"whatsapp://send?phone={mobile_no}&text={encoded_message}"
-
-    # Construct the full command
-    full_command = f'start "" "{whatsapp_url}"'
-
-    # Open WhatsApp with the constructed URL using cmd.exe
-    subprocess.run(full_command, shell=True)
-    time.sleep(5)
-    subprocess.run(full_command, shell=True)
-    
-    pyautogui.hotkey('ctrl', 'f')
-
-    for i in range(1, target_tab):
-        pyautogui.hotkey('tab')
-
-    pyautogui.hotkey('enter')
-    speak(jarvis_message)
+        # Tab to call icon and press Enter (may vary)
+        if flag == 'call':
+            # Voice call icon location or navigation logic
+            pyautogui.hotkey('tab')  # move to top bar
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move again
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move to top bar
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move again
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move to top bar
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move again
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move to top bar
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move again
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move to top bar
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move again
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move to top bar
+            time.sleep(0.5)
+            pyautogui.press('enter')
+            speak("Calling to " + name)
+        else:
+            # Video call icon location or navigation logic
+            pyautogui.hotkey('tab')  # move to top bar
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move again
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move to top bar
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move again
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move to top bar
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move again
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move to top bar
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move again
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move to top bar
+            time.sleep(0.5)
+            pyautogui.hotkey('tab')  # move again
+            time.sleep(0.5)
+            pyautogui.press('enter')
+            speak("Starting video call with " + name)
 
 # chat bot 
 def chatBot(query):
@@ -215,3 +248,15 @@ def sendMessage(message, mobileNo, name):
     #send
     tapEvents(957, 1397)
     speak("message send successfully to "+name)
+
+
+def translate_text(text, target_language):
+    translator = Translator()
+    try:
+        translated = translator.translate(text, dest=target_language)
+        speak(f"The translation in {target_language} is: {translated.text}")
+        return translated.text
+    except Exception as e:
+        speak("Sorry, I couldn't translate that.")
+        print(f"Translation Error: {e}")
+        return ""

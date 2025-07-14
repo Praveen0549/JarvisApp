@@ -2,17 +2,43 @@ import pyttsx3
 import speech_recognition as sr
 import eel
 import time
-def speak(text):
-    text = str(text)
-    engine = pyttsx3.init('sapi5')
-    voices = engine.getProperty('voices') 
-    engine.setProperty('voice', voices[0].id)
-    engine.setProperty('rate', 174)
-    eel.DisplayMessage(text)
-    engine.say(text)
-    eel.receiverText(text)
-    engine.runAndWait()
+import re
+from gtts import gTTS
+import playsound
+import os
+import tempfile
 
+def speak(text, lang='en'):
+    try:
+        eel.DisplayMessage(text)
+        eel.receiverText(text)
+
+        if lang == 'en':
+            engine = pyttsx3.init('sapi5')
+            voices = engine.getProperty('voices')
+
+            
+            for voice in voices:
+                if "male" in voice.name.lower() or "david" in voice.name.lower():
+                    engine.setProperty('voice', voice.id)
+                    break
+            else:
+                engine.setProperty('voice', voices[0].id)  # fallback
+
+            engine.setProperty('rate', 160)  # slower, JARVIS-like
+            engine.say(text)
+            engine.runAndWait()
+
+        else:
+            filename = "temp_voice.mp3"
+            tts = gTTS(text=text, lang=lang)
+            tts.save(filename)
+            playsound.playsound(filename)
+            time.sleep(1)
+            os.remove(filename)
+
+    except Exception as e:
+        print(f"Error in speak(): {e}")
 
 def takecommand():
 
@@ -88,6 +114,42 @@ def allCommands(message=1):
                         message = 'video call'
                                         
                     whatsApp(contact_no, query, message, name)
+        elif "translate" in query:
+            from engine.features import translate_text
+
+            # Extract text and language
+            try:
+                match = re.search(r'translate\s+"?(.+?)"?\s+to\s+(\w+)', query)
+                if match:
+                    sentence = match.group(1)
+                    language = match.group(2).lower()
+
+                    # Map language name to language code
+                    language_codes = {
+                        'hindi': 'hi',
+                        'spanish': 'es',
+                        'french': 'fr',
+                        'german': 'de',
+                        'telugu': 'te',
+                        'tamil': 'ta',
+                        'korean': 'ko',
+                        'japanese': 'ja',
+                        'english': 'en'
+                        # Add more if needed
+                    }
+
+                    if language in language_codes:
+                        translated_text = translate_text(sentence, language_codes[language])
+                        speak(translated_text, lang=language_codes[language])
+                        eel.DisplayMessage(f"Translated: {translated_text}")
+
+                    else:
+                        speak("Sorry, I don't support that language yet.")
+                else:
+                    speak("Please say the sentence clearly like 'translate how are you to hindi'")
+            except Exception as e:
+                print(f"Translation Parsing Error: {e}")
+                speak("Something went wrong in translation")
 
         else:
             from engine.features import chatBot
